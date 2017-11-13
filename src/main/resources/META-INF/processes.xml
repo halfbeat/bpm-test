@@ -1,0 +1,30 @@
+<process-application
+        xmlns="http://www.camunda.org/schema/1.0/ProcessApplication"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <process-engine name="default">
+        <configuration>org.camunda.bpm.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration</configuration>
+        <properties>
+            <property name="history">full</property>
+            <property name="databaseSchemaUpdate">true</property>
+            <property name="authorizationEnabled">true</property>
+        </properties>
+    </process-engine>
+
+    <process-archive name="pizza-order">
+        <process-engine>default</process-engine>
+        <properties>
+            <property name="isDeleteUponUndeploy">true</property>
+            <property name="isScanForProcessDefinitions">true</property>
+        </properties>
+    </process-archive>
+
+    <process-archive name="conciliamos">
+        <process-engine>default</process-engine>
+        <properties>
+            <property name="isDeleteUponUndeploy">true</property>
+            <property name="isScanForProcessDefinitions">true</property>
+        </properties>
+    </process-archive>
+
+</process-application>
