@@ -1,0 +1,22 @@
+dese: 01/11/2017
+hasta: 30/11/2017
+ignorar-fechas:
+  - 03/10/2017
+  - 06/10/2017
+horas-diarias: 7.5
+dias-semana:
+  - Lunes
+  - Martes
+  - Miercoles
+  - Jueves
+  - Viernes
+projects:
+  - P1
+  - P2
+  - P3
+actividades:
+  - A1
+  - A2
+  - A3
+
+
