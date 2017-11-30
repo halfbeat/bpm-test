@@ -9,13 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
-import java.util.IntSummaryStatistics;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -80,7 +73,7 @@ public class Main {
             printHelp(options);
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
-            logger.debug(e.getMessage(), e);
+            logger.trace(e.getMessage(), e);
         }
     }
 
