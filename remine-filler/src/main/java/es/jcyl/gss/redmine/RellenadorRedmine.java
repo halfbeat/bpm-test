@@ -53,24 +53,55 @@ class RellenadorRedmine {
     private Collection<TimeEntry> construirEntradasRedmine() throws RedmineException {
         LocalDate start = informacion.getFechaInicio().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate end = informacion.getFechaFin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        List<LocalDate> diasAIgnorar = informacion.getIgnorarFechas().stream()
+                .map(f -> f.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+                .collect(Collectors.toList());
         List<LocalDate> listaDias = Stream.iterate(start, d -> d.plusDays(1))
                 .limit(start.until(end.plusDays(1), ChronoUnit.DAYS))
-                .filter(d -> diasSemana.contains(d.getDayOfWeek()))
+                .filter(d -> diasSemana.contains(d.getDayOfWeek()) && !diasAIgnorar.contains(d))
                 .collect(Collectors.toList());
-        double minimoPeriodoAsignable = informacion.getMinPeriodoHorasAsignable()
+        double minimoPeriodoAsignable = Optional.ofNullable(informacion.getMinPeriodoHorasAsignable())
                 .orElse(InformacionRellenoRedmine.DEFAULT_MIN_PERIODO_ASIGNABLE);
-        double maximoPeriodoAsignable = informacion.getMaxPeriodoHorasAsignable()
+        double maximoPeriodoAsignable = Optional.ofNullable(informacion.getMaxPeriodoHorasAsignable())
                 .orElse(InformacionRellenoRedmine.DEFAULT_MAX_PERIODO_ASIGNABLE);
         double piezasDia = informacion.getHorasDiarias() / minimoPeriodoAsignable;
 
-        Map<Proyecto, Project> mapaProyectosRedmine = informacion.getProyectos().stream()
-                .collect(Collectors.toMap(Function.identity(), this::obtenerPRoyectoRedmine));
+        Set<String> proyectos = Stream.concat(
+                informacion.getImputaciones().stream().map(Imputacion::getProyecto),
+                informacion.getProyectos().stream().map(Proyecto::getId)
+        ).collect(Collectors.toSet());
+
+
+        Map<String, Project> mapaProyectosRedmine = proyectos.stream().collect(
+                Collectors.toMap(Function.identity(), this::obtenerPRoyectoRedmine)
+        );
 
         logger.debug("Recuperando el usuario actual");
         User usuarioActual = gestorRedmine.getCurrentUser();
         logger.debug("Usuario: {}", usuarioActual);
 
+        logger.debug("Grabación de las tareas fijas");
         List<TimeEntry> resultado = new ArrayList<>();
+        Map<LocalDate, Integer> ocupados = new HashMap<>();
+        for (Imputacion tarea : informacion.getImputaciones()) {
+            Project proyectoRedmine = mapaProyectosRedmine.get(tarea.getProyecto());
+            TimeEntry imputacion = new TimeEntry();
+            imputacion.setProjectId(proyectoRedmine.getId());
+            imputacion.setActivityId(tarea.getActividad().getValue());
+            imputacion.setUserId(usuarioActual.getId());
+            imputacion.setComment(tarea.getTexto());
+            imputacion.setHours((float) tarea.getTiempo());
+            imputacion.setCreatedOn(tarea.getFecha());
+            imputacion.setSpentOn(tarea.getFecha());
+            imputacion.setUpdatedOn(tarea.getFecha());
+            resultado.add(imputacion);
+            LocalDate ldate = tarea.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            int actual = ocupados.getOrDefault(ldate, 0);
+            actual += tarea.getTiempo() / minimoPeriodoAsignable;
+            ocupados.put(ldate, actual);
+        }
+
         Random r = new Random();
         RandomCollection<Proyecto> generadorAleatorioProyectos = new RandomCollection<>();
         Map<Proyecto, RandomCollection<TipoActividad>> mapaGeneradoresActividadesProyecto = new HashMap<>();
@@ -85,11 +116,11 @@ class RellenadorRedmine {
                 }
             }
             mapaGeneradoresActividadesProyecto.put(proyecto, generador);
-            generadorAleatorioProyectos.add(proyecto.getPeso().orElse(1.0), proyecto);
+            generadorAleatorioProyectos.add(Optional.ofNullable(proyecto.getPeso()).orElse(1.0), proyecto);
         }
         for (LocalDate fecha : listaDias) {
             logger.debug("Dia {}", fecha.format(DateTimeFormatter.ISO_LOCAL_DATE));
-            int restante = (int) piezasDia;
+            int restante = (int) piezasDia - ocupados.getOrDefault(fecha, 0);
 
             while (restante > 0) {
                 int periodo = r.nextInt(restante + 1);
@@ -99,14 +130,17 @@ class RellenadorRedmine {
                 Proyecto proyecto = generadorAleatorioProyectos.next();
                 TipoActividad actividad = mapaGeneradoresActividadesProyecto.get(proyecto).next();
                 logger.debug("A la actividad {} del proyecto {} se le imputarán {} horas",
-                        new Object[]{actividad, proyecto.getId(), periodo * minimoPeriodoAsignable});
+                        actividad, proyecto.getId(), periodo * minimoPeriodoAsignable);
                 TimeEntry imputacion = new TimeEntry();
-                imputacion.setProjectId(mapaProyectosRedmine.get(proyecto).getId());
+                Project proyectoRedmine = mapaProyectosRedmine.get(proyecto.getId());
+                imputacion.setProjectId(proyectoRedmine.getId());
                 imputacion.setActivityId(actividad.getValue());
-                imputacion.setComment("Prueba");
+                imputacion.setUserId(usuarioActual.getId());
+                imputacion.setComment(actividad + " del proyecto " + proyectoRedmine.getName());
                 imputacion.setHours((float) (periodo * minimoPeriodoAsignable));
                 imputacion.setCreatedOn(Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 imputacion.setSpentOn(Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                imputacion.setUpdatedOn(Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 resultado.add(imputacion);
                 restante -= periodo;
             }
@@ -115,9 +149,9 @@ class RellenadorRedmine {
         return resultado;
     }
 
-    private Project obtenerPRoyectoRedmine(Proyecto proyecto) {
+    private Project obtenerPRoyectoRedmine(String proyecto) {
         try {
-            return gestorRedmine.getProjectByKey(proyecto.getId());
+            return gestorRedmine.getProjectByKey(proyecto);
         } catch (RedmineException e) {
             throw new RuntimeException(e);
         }

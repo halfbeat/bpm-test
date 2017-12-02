@@ -1,7 +1,7 @@
 package es.jcyl.gss.redmine;
 
 // TODO: ELiminar si no se usa
-public class DatosInvalidosException extends Exception {
+class DatosInvalidosException extends Exception {
     public DatosInvalidosException() {
     }
 

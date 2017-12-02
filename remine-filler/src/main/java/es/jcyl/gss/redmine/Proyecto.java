@@ -1,16 +1,14 @@
 package es.jcyl.gss.redmine;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-public class Proyecto {
+class Proyecto {
     private String id;
     private List<TipoActividad> actividades;
     private List<Double> pesosActividades;
-    private Optional<Double> peso = Optional.empty();
-    private Optional<Double> minHorasSemanales = Optional.empty();
-    private Optional<Double> maxHorasSemanales = Optional.empty();
+    private Double peso ;
+    private Double minHorasSemanales ;
+    private Double maxHorasSemanales ;
 
     public Proyecto() {
     }
@@ -18,10 +16,10 @@ public class Proyecto {
     public Proyecto(String id, List<TipoActividad> actividades, Double peso) {
         this.id = id;
         this.actividades = actividades;
-        this.peso = Optional.ofNullable(peso);
+        this.peso = peso;
     }
 
-    public String getId() {
+    String getId() {
         return id;
     }
 
@@ -29,7 +27,7 @@ public class Proyecto {
         this.id = id;
     }
 
-    public List<TipoActividad> getActividades() {
+    List<TipoActividad> getActividades() {
         return actividades;
     }
 
@@ -37,15 +35,15 @@ public class Proyecto {
         this.actividades = actividades;
     }
 
-    public Optional<Double> getPeso() {
+    Double getPeso() {
         return peso;
     }
 
     public void setPeso(double peso) {
-        this.peso = Optional.ofNullable(peso);
+        this.peso = peso;
     }
 
-    public List<Double> getPesosActividades() {
+    List<Double> getPesosActividades() {
         return pesosActividades;
     }
 
@@ -53,24 +51,24 @@ public class Proyecto {
         this.pesosActividades = pesosActividades;
     }
 
-    public void setPeso(Optional<Double> peso) {
+    public void setPeso(Double peso) {
         this.peso = peso;
     }
 
-    public Optional<Double> getMinHorasSemanales() {
+    public Double getMinHorasSemanales() {
         return minHorasSemanales;
     }
 
     public void setMinHorasSemanales(Double minHorasSemanales) {
-        this.minHorasSemanales = Optional.ofNullable(minHorasSemanales);
+        this.minHorasSemanales = minHorasSemanales;
     }
 
-    public Optional<Double> getMaxHorasSemanales() {
+    public Double getMaxHorasSemanales() {
         return maxHorasSemanales;
     }
 
     public void setMaxHorasSemanales(Double maxHorasSemanales) {
-        this.maxHorasSemanales = Optional.ofNullable(maxHorasSemanales);
+        this.maxHorasSemanales = maxHorasSemanales;
     }
 
     // TODO: Crear los métodos toString, equals y hashCode

@@ -1,26 +1,25 @@
 package es.jcyl.gss.redmine;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-public class InformacionRellenoRedmine {
-    public static final double DEFAULT_MIN_PERIODO_ASIGNABLE = 1;
-    public static final double DEFAULT_MAX_PERIODO_ASIGNABLE = 1;
+class InformacionRellenoRedmine {
+    static final double DEFAULT_MIN_PERIODO_ASIGNABLE = 1;
+    static final double DEFAULT_MAX_PERIODO_ASIGNABLE = 1;
     private Date fechaInicio;
     private Date fechaFin;
-    private Date[] ignorarFechas;
+    private List<Date> ignorarFechas;
     private List<DiaSemana> diasSemana;
     private Double horasDiarias;
     private List<Proyecto> proyectos;
-    private Optional<Double> minPeriodoHorasAsignable;
-    private Optional<Double> maxPeriodoHorasAsignable;
+    private Double minPeriodoHorasAsignable;
+    private Double maxPeriodoHorasAsignable;
+    private List<Imputacion> imputaciones;
 
     public InformacionRellenoRedmine() {
     }
 
-    public InformacionRellenoRedmine(Date fechaInicio, Date fechaFin, Date[] ignorarFechas, List<DiaSemana> diasSemana, Double horasDiarias,
+    public InformacionRellenoRedmine(Date fechaInicio, Date fechaFin, List<Date> ignorarFechas, List<DiaSemana> diasSemana, Double horasDiarias,
                                      List<Proyecto> proyectos) {
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
@@ -30,7 +29,7 @@ public class InformacionRellenoRedmine {
         this.proyectos = proyectos;
     }
 
-    public Date getFechaInicio() {
+    Date getFechaInicio() {
         return fechaInicio;
     }
 
@@ -38,7 +37,7 @@ public class InformacionRellenoRedmine {
         this.fechaInicio = fechaInicio;
     }
 
-    public Date getFechaFin() {
+    Date getFechaFin() {
         return fechaFin;
     }
 
@@ -46,15 +45,15 @@ public class InformacionRellenoRedmine {
         this.fechaFin = fechaFin;
     }
 
-    public Date[] getIgnorarFechas() {
+    List<Date> getIgnorarFechas() {
         return ignorarFechas;
     }
 
-    public void setIgnorarFechas(Date[] ignorarFechas) {
+    public void setIgnorarFechas(List<Date> ignorarFechas) {
         this.ignorarFechas = ignorarFechas;
     }
 
-    public List<DiaSemana> getDiasSemana() {
+    List<DiaSemana> getDiasSemana() {
         return diasSemana;
     }
 
@@ -62,7 +61,7 @@ public class InformacionRellenoRedmine {
         this.diasSemana = diasSemana;
     }
 
-    public Double getHorasDiarias() {
+    Double getHorasDiarias() {
         return horasDiarias;
     }
 
@@ -70,7 +69,7 @@ public class InformacionRellenoRedmine {
         this.horasDiarias = horasDiarias;
     }
 
-    public List<Proyecto> getProyectos() {
+    List<Proyecto> getProyectos() {
         return proyectos;
     }
 
@@ -78,40 +77,49 @@ public class InformacionRellenoRedmine {
         this.proyectos = proyectos;
     }
 
-    public Optional<Double> getMinPeriodoHorasAsignable() {
+    Double getMinPeriodoHorasAsignable() {
         return minPeriodoHorasAsignable;
     }
 
     public void setMinPeriodoHorasAsignable(Double minPeriodoHorasAsignable) {
-        this.minPeriodoHorasAsignable = Optional.ofNullable(minPeriodoHorasAsignable);
+        this.minPeriodoHorasAsignable = minPeriodoHorasAsignable;
     }
 
-    public Optional<Double> getMaxPeriodoHorasAsignable() {
+    Double getMaxPeriodoHorasAsignable() {
         return maxPeriodoHorasAsignable;
     }
 
     public void setMaxPeriodoHorasAsignable(Double maxPeriodoHorasAsignable) {
-        this.maxPeriodoHorasAsignable = Optional.ofNullable(maxPeriodoHorasAsignable);
+        this.maxPeriodoHorasAsignable = maxPeriodoHorasAsignable;
+    }
+
+    List<Imputacion> getImputaciones() {
+        return imputaciones;
+    }
+
+    public void setImputaciones(List<Imputacion> imputaciones) {
+        this.imputaciones = imputaciones;
     }
 
     // TODO: Crear los métodos toString, equals y hashCode
 
     @Override
     public String toString() {
-        String prjs = "";
+        StringBuilder prjs = new StringBuilder();
         if (proyectos != null && proyectos.size() != 0) {
             for (int idx = 0; idx < proyectos.size() - 1; idx++) {
-                prjs = prjs + "\n\t\t" + proyectos.get(idx) + ",";
+                prjs.append("\n\t\t").append(proyectos.get(idx)).append(",");
             }
-            prjs = prjs + "\n\t\t" + proyectos.get(proyectos.size() - 1);
+            prjs.append("\n\t\t").append(proyectos.get(proyectos.size() - 1));
         }
         return "InformacionRellenoRedmine{" +
                 "\n\tfechaInicio=" + fechaInicio + "," +
                 "\n\tfechaFin=" + fechaFin + "," +
-                "\n\tignorarFechas=" + Arrays.toString(ignorarFechas) + "," +
+                "\n\tignorarFechas=" + ignorarFechas + "," +
                 "\n\tminPeriodoHorasAsignable=" + minPeriodoHorasAsignable + "," +
                 "\n\tmaxPeriodoHorasAsignable=" + maxPeriodoHorasAsignable + "," +
                 "\n\tdiasSemana=" + diasSemana.toString() + "," +
+                "\n\timputaciones=" + imputaciones.toString() + "," +
                 "\n\thorasDiarias=" + horasDiarias + "," +
                 "\n\tproyectos=[" + prjs +
                 "\n\t]\n}";

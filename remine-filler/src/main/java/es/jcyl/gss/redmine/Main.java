@@ -3,6 +3,7 @@ package es.jcyl.gss.redmine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.taskadapter.redmineapi.RedmineManager;
+import com.taskadapter.redmineapi.RedmineManagerFactory;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import java.text.SimpleDateFormat;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    private static ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
+    private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
             .setDateFormat(new SimpleDateFormat("dd/MM/yyyy"));
 
     public static void main(String[] args) throws Exception {
@@ -55,9 +56,9 @@ public class Main {
             String apiKey = cmd.getOptionValue("api-key");
 
             logger.debug("Parámetros de la ejecución:");
-            logger.debug("file = {}\nurl = {}\napi-key = {}", new String[]{file, url, apiKey});
+            logger.debug("file = {}\nurl = {}\napi-key = {}", (Object[]) new String[]{file, url, apiKey});
 
-            RedmineManager gestorRedmine = new RedmineManager(url, apiKey);
+            RedmineManager gestorRedmine = RedmineManagerFactory.createWithApiKey(url, apiKey);
 
             try (FileInputStream is = new FileInputStream(file)) {
                 logger.info("Leyendo fichero YAML con la configuración ...");
@@ -73,7 +74,7 @@ public class Main {
             printHelp(options);
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
-            logger.trace(e.getMessage(), e);
+            logger.debug(e.getMessage(), e);
         }
     }
 
